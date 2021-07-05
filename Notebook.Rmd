@@ -1,0 +1,124 @@
+---
+title: "R TUBES_FSD"
+output: html_notebook
+---
+---
+```{r}
+#Nama Kelompok : Jeruk
+#Anggota       : 1. Rashid Adani M . J. (19523030)
+#                2. Faruq Zulfikar Azzam (19523230)
+#                3. Arga Aditya Windiarso (19523059)
+```
+
+Membaca Dataset yang diberikan
+
+```{r}
+dataset<- read.csv('D:/R Projects/TUBES_FSD/mlbb_hero.csv')
+str(dataset)
+head(dataset)
+```
+Menormalisasi data
+```{r}
+min_max_norm <- function(x) {
+    (x - min(x)) / (max(x) - min(x))
+}
+dataset$defense_overall<-min_max_norm(dataset$defense_overall)
+dataset$offense_overall<-min_max_norm(dataset$offense_overall)
+dataset$skill_effect_overall<-min_max_norm(dataset$skill_effect_overall)
+dataset$difficulty_overall<-min_max_norm(dataset$difficulty_overall)
+dataset$movement_spd<-min_max_norm(dataset$movement_spd)
+dataset$magic_defense<-min_max_norm(dataset$magic_defense)
+dataset$mana<-min_max_norm(dataset$mana)
+dataset$hp_regen<-min_max_norm(dataset$hp_regen)
+dataset$physical_atk<-min_max_norm(dataset$physical_atk)
+dataset$physical_defense<-min_max_norm(dataset$physical_defense)
+dataset$hp<-min_max_norm(dataset$attack_speed)
+dataset$mana_regen<-min_max_norm(dataset$mana_regen)
+dataset$win_rate<-min_max_norm(dataset$win_rate)
+dataset$pick_rate<-min_max_norm(dataset$pick_rate)
+dataset$ban_rate<-min_max_norm(dataset$ban_rate)
+dataset$release_year<-min_max_norm(dataset$release_year)
+
+dataset<- subset(dataset, select = -c(hero_name))
+
+dataset
+```
+
+
+
+Memodelkan Naive Bayes
+```{r}
+library(naivebayes)
+Naive_Bayes_Model= naive_bayes(role ~., data=dataset, laplace = 1)
+tables(Naive_Bayes_Model)
+```
+
+Mendeclare hero baru
+```{r}
+new_data <- data.frame(defense_overall = 5.5,
+                       offense_overall = 7.5,skill_effect_overall = 3.5, difficulty_overall = 5.0,
+                       movement_spd= 280, magic_defense = 10, mana= 350,
+                       hp_regen = 45, physical_atk = 130, physical_defense = 21,
+                       hp = 2315, attack_speed = 0.75, mana_regen = 15,
+                       win_rate = 50.00, pick_rate = 0.41, ban_rate = 0.05,
+                       release_year = 2021, role = " ")
+
+new_data2 <- data.frame(defense_overall = 7.0,
+                        offense_overall = 5.0,
+                        skill_effect_overall = 5.0,
+                        difficulty_overall = 4.5,
+                       movement_spd= 150, magic_defense = 0, mana= 400,
+                       hp_regen = 50, physical_atk = 200, physical_defense = 50,
+                       hp = 2500, attack_speed = 0.43, mana_regen = 35,
+                       win_rate = 55.00, pick_rate = 0.50, ban_rate = 0.08,
+                       release_year = 2021, role = " ")
+
+new_data3 <- data.frame(defense_overall = 8.0,
+                       offense_overall = 4.0,
+                       skill_effect_overall = 7.0,
+                       difficulty_overall = 3.1,
+                       movement_spd= 120, magic_defense = 10, mana= 500,
+                       hp_regen = 40, physical_atk = 150, physical_defense = 43,
+                       hp = 2415, attack_speed = 0.53, mana_regen = 41,
+                       win_rate = 41.00, pick_rate = 0.60, ban_rate = 0.09,
+                       release_year = 2021, role = " ")
+
+new_data
+new_data2
+new_data3
+```
+Vektor hero-hero baru di atas.
+
+```{r}
+vector_prediction = predict(Naive_Bayes_Model, new_data, type = "prob")
+vector_prediction2 = predict(Naive_Bayes_Model, new_data2, type = "prob")
+vector_prediction3 = predict(Naive_Bayes_Model, new_data3, type = "prob")
+
+vector_prediction
+vector_prediction2
+vector_prediction3
+```
+
+Memprediksi hero baru
+
+```{r}
+role_hero1 = predict(Naive_Bayes_Model, new_data, type = "class")
+role_hero2 = predict(Naive_Bayes_Model, new_data2, type = "class")
+role_hero3 = predict(Naive_Bayes_Model, new_data3, type = "class")
+role_hero1
+role_hero2
+role_hero3
+```
+Meng-assign role hero baru.
+```{r}
+new_data$role = role_hero1
+new_data2$role = role_hero2
+new_data3$role = role_hero3
+```
+
+Melihat hero baru.
+```{r}
+new_data
+new_data2
+new_data3
+```
